@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Housekeeping Cost Calculator | Property Providers</title>
+  <style>
+    :root{
+      --pp-blue:#1277A0;
+      --pp-light:#89C1CE;
+      --pp-midnight:#263238;
+      --pp-yellow:#FBB034;
+      --pp-turq:#00B1B0;
+
+      --bg:#0f1417;
+      --card:#121a1f;
+      --card2:#0f171c;
+      --text:#eef4f7;
+      --muted:#b8c6ce;
+      --line:rgba(255,255,255,.10);
+
+      --radius:14px;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --shadow2: 0 10px 18px rgba(0,0,0,.22);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", Helvetica, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(18,119,160,.35), transparent 55%),
+                  radial-gradient(900px 500px at 85% 0%, rgba(0,177,176,.22), transparent 55%),
+                  linear-gradient(180deg, #0b1013 0%, #0f1417 45%, #0b1013 100%);
+      color:var(--text);
+
+      /* --- DISPLAY-ONLY COMFORT TWEAKS (no formulas/content changes) --- */
+      line-height: 1.55;
+    }
+
+    /* --- DISPLAY-ONLY COMFORT TWEAKS (no formulas/content changes) --- */
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 64px}
+    /* a touch more breathing room overall */
+    header{margin-bottom:22px;padding:16px 18px}
+    .grid{gap:18px}
+    .card{padding:18px}
+    .row{gap:14px}
+    .row3{gap:14px}
+    label{gap:8px; line-height:1.45}
+    input, select, textarea{padding:12px 12px}
+    .pill{padding:9px 12px}
+    .btn{padding:10px 12px}
+    .splitActions{gap:12px;margin-top:12px}
+    .kpis{gap:12px;margin-top:10px}
+    .kpi{padding:12px 14px}
+    .breakdown{margin-top:14px}
+    .breakdownBody{padding:12px 14px}
+    .lineItem{padding:8px 0}
+    .detailsBody{padding:14px 16px}
+    .hr{margin:14px 0}
+    th, td{padding:10px 10px}
+    .topActions{gap:12px}
+    .card .hint{margin:0 0 14px; line-height:1.5}
+    .mini{margin-top:8px; line-height:1.45}
+    .footerNote{margin-top:12px; line-height:1.55}
+
+    /* bigger, more tappable controls on small screens */
+    @media (max-width:620px){
+      .wrap{padding:22px 14px 56px}
+      .card{padding:16px}
+      input, select, textarea{padding:12px 12px}
+      .btn{padding:11px 12px}
+    }
+
+    header{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(18,26,31,.75), rgba(18,26,31,.45));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;min-width:260px;
+    }
+    .logo{
+      height:26px;
+      width:auto;
+      opacity:.78;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.35));
+    }
+    .titleblock{display:flex;flex-direction:column;gap:4px} /* slightly more line spacing */
+    h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);margin:0;line-height:1.3}
+
+    .topActions{
+      display:flex;flex-wrap:wrap;justify-content:flex-end;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      .brand{min-width:unset}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(18,26,31,.88), rgba(15,23,28,.85));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0 0 12px;
+      font-size:13px;
+      letter-spacing:.25px;
+      color:#ffffff;
+    }
+    .card .hint{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .row{display:grid;grid-template-columns: 1fr 1fr}
+    .row3{display:grid;grid-template-columns: 1fr 1fr 1fr}
+    @media (max-width:620px){
+      .row,.row3{grid-template-columns:1fr}
+    }
+
+    label{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
+    input, select, textarea{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+      border-radius: 12px;
+      outline:none;
+      font-size: 13px;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(137,193,206,.55);
+      box-shadow: 0 0 0 3px rgba(137,193,206,.16);
+    }
+    input[type="number"]{appearance:textfield}
+    .mini{
+      font-size:11px;color:var(--muted);
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-size:12px;
+      user-select:none;
+    }
+
+    .btn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:650;
+      font-size:12px;
+      display:inline-flex;align-items:center;gap:8px;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      position:relative;
+    }
+    .btn:hover{
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(18,119,160,.95), rgba(18,119,160,.70));
+      border-color: rgba(18,119,160,.85);
+    }
+    .btn.primary:hover{
+      background: linear-gradient(180deg, rgba(18,119,160,1), rgba(18,119,160,.78));
+    }
+    .btn.warn{
+      background: linear-gradient(180deg, rgba(251,176,52,.95), rgba(251,176,52,.72));
+      border-color: rgba(251,176,52,.80);
+      color:#1b1306;
+    }
+    .btn.ghost{
+      background: transparent;
+    }
+
+    .btn[data-tip]::after{
+      content: attr(data-tip);
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      bottom: calc(100% + 10px);
+      width: min(300px, 75vw);
+      background: rgba(15,23,28,.97);
+      color: var(--text);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding:8px 10px;
+      font-size:12px;
+      line-height:1.35;
+      box-shadow: 0 12px 26px rgba(0,0,0,.35);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .15s ease;
+      text-align:left;
+      z-index: 9;
+    }
+    .btn[data-tip]::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      bottom: calc(100% + 4px);
+      border:6px solid transparent;
+      border-top-color: rgba(255,255,255,.14);
+      opacity:0;
+      transition: opacity .15s ease;
+      z-index: 9;
+    }
+    .btn:hover[data-tip]::after, .btn:hover[data-tip]::before{opacity:1}
+
+    details{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    summary{
+      cursor:pointer;
+      list-style:none;
+      padding:12px 14px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      user-select:none;
+      font-weight:750;
+      font-size:12px;
+      color:#fff;
+      background: linear-gradient(180deg, rgba(38,50,56,.45), rgba(38,50,56,.18));
+      border-bottom:1px solid var(--line);
+    }
+    summary::-webkit-details-marker{display:none}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    th, td{
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      text-align:left;
+      vertical-align:top;
+    }
+    th{color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+    td input{width:100%}
+
+    .kpis{
+      display:grid;grid-template-columns: 1fr 1fr;
+    }
+    .kpi{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+    }
+    .kpi .lbl{font-size:11px;color:var(--muted)}
+    .kpi .val{font-size:18px;font-weight:850;margin-top:6px} /* slightly more spacing */
+    .kpi .val small{font-size:12px;color:var(--muted);font-weight:700}
+
+    .breakdown{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      overflow:hidden;
+    }
+    .breakdownHead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:10px 12px;
+      background: rgba(38,50,56,.30);
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .breakdownHead b{font-size:12px}
+    .breakdownBody{background: rgba(255,255,255,.03)}
+    .lineItem{
+      display:flex;justify-content:space-between;gap:12px;
+      border-bottom:1px dashed rgba(255,255,255,.10);
+      font-size:12px;color:var(--text);
+    }
+    .lineItem:last-child{border-bottom:none}
+    .lineItem .left{color:var(--muted)}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      background: rgba(0,177,176,.15);
+      border:1px solid rgba(0,177,176,.35);
+      color:#d9ffff;
+      font-size:11px;
+      font-weight:750;
+    }
+
+    .footerNote{
+      font-size:11px;color:var(--muted);
+    }
+
+    .splitActions{display:flex;flex-wrap:wrap}
+    .soft{color:var(--muted)}
+    .hr{height:1px;background:rgba(255,255,255,.10)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <!-- Put "Full Logo White Transparent BG.png" in the SAME folder as this HTML file -->
+        <img class="logo" src="Full Logo White Transparent BG.png" alt="Property Providers logo" />
+        <div class="titleblock">
+          <h1>Housekeeping Cost Calculator</h1>
+          
+        </div>
+      </div>
+
+      <div class="topActions">
+        <button class="btn primary" id="btnCopySummary" data-tip="Copies the headline result (clean type + total) to your clipboard. Handy for Slack / notes.">Copy summary</button>
+        <button class="btn" id="btnCopyBreakdown" data-tip="Copies a line-by-line breakdown to your clipboard (base price, fees, uplifts). Useful when someone asks ‘how did you get that?’.">Copy breakdown</button>
+        <button class="btn" id="btnExport" data-tip="Exports your current rate card (including any edits) as a JSON file so you can back it up or share it with the team.">Export rates</button>
+        <label class="btn ghost" for="fileImport" data-tip="Imports a previously exported rate-card JSON (overwrites the current rate card).">
+          Import rates
+          <input id="fileImport" type="file" accept="application/json" style="display:none">
+        </label>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: job inputs -->
+      <section class="card">
+        <h2>Job details</h2>
+        <p class="hint">Enter the property basics and choose the clean type. The calculator starts from the supplier’s bedroom brackets, then applies selected fees/uplifts.</p>
+
+        <div class="row">
+          <label>
+            Clean type
+            <select id="cleanType">
+              <option value="departure">Departure (turnover)</option>
+              <option value="strip">Strip &amp; Clean</option>
+              <option value="refresh">Refresh clean</option>
+              <option value="midstay">Mid-stay clean</option>
+              <option value="initiation">Initiation / deep clean</option>
+              <option value="endoflease">End of lease</option>
+              <option value="linenSetup">Linen &amp; amenities set-up</option>
+            </select>
+            
+          </label>
+
+          <label>
+            Bedrooms
+            <input id="bedrooms" type="number" min="0" step="1" value="2" />
+            
+          </label>
+        </div>
+
+        <div class="row3">
+          <label>
+            Bathrooms
+            <input id="bathrooms" type="number" min="0" step="1" value="1" />
+            
+          </label>
+          <label>
+            Living rooms
+            <input id="livingRooms" type="number" min="0" step="1" value="1" />
+          
+          </label>
+          <label>
+            Kitchens
+            <input id="kitchens" type="number" min="0" step="1" value="1" />
+         
+          </label>
+        </div>
+
+        <div class="row3">
+          <label>
+            Floors / levels
+            <input id="floors" type="number" min="1" step="1" value="1" />
+  
+          </label>
+          <label>
+            Outdoor areas
+            <input id="outdoorAreas" type="number" min="0" step="1" value="1" />
+            
+          </label>
+          <label>
+            Total square metres
+            <input id="sqm" type="number" min="0" step="1" value="90" />
+            
+          </label>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <label class="pill" style="justify-content:space-between">
+            <span>Public holiday uplift (25%)</span>
+            <input id="publicHoliday" type="checkbox" />
+          </label>
+
+          <label class="pill" style="justify-content:space-between">
+            <span>Last-minute booking fee ($55)</span>
+            <input id="lastMinute" type="checkbox" />
+          </label>
+        </div>
+
+        <div class="row">
+          <label class="pill" style="justify-content:space-between">
+            <span>Include GST (10%)</span>
+            <input id="includeGST" type="checkbox" checked />
+          </label>
+
+          <label>
+            Notes (optional)
+            <input id="jobNotes" type="text" placeholder="e.g., large glass, pets, beach sand…">
+            <span class="mini soft">Notes don’t change pricing; they’re just copied into the breakdown if you want them.</span>
+          </label>
+        </div>
+
+        <div class="splitActions">
+          <button class="btn primary" id="btnCalculate" data-tip="Recalculates using the current job inputs and the rate card.">Calculate</button>
+          <button class="btn" id="btnResetJob" data-tip="Resets the job inputs (bedrooms/bathrooms etc.) back to sensible defaults.">Reset job</button>
+        </div>
+
+        <div class="footerNote">
+          
+        </div>
+      </section>
+
+      <!-- RIGHT: output -->
+      <section class="card">
+        <h2>Estimate</h2>
+        <p class="hint">This is a pricing estimate. It’s designed to be consistent and explainable — not to replace site judgement for unusually large or complex properties.</p>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="lbl">Total estimate</div>
+            <div class="val" id="kpiTotal">$0 <small id="kpiGSTHint"></small></div>
+          </div>
+          <div class="kpi">
+            <div class="lbl">Base bracket</div>
+            <div class="val" id="kpiBase">$0</div>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <div class="breakdownHead">
+            <b>Breakdown</b>
+            <span class="badge" id="badgeMode">Bedroom bracket base</span>
+          </div>
+          <div class="breakdownBody" id="breakdownBody">
+            <!-- line items injected -->
+          </div>
+        </div>
+
+        <div class="splitActions">
+          <button class="btn" id="btnDownloadCSV" data-tip="Downloads the current estimate as a small CSV (one row per line item). Handy for attaching to an internal ticket.">Download CSV</button>
+          <button class="btn" id="btnClearOutput" data-tip="Clears the breakdown panel (does not change rates or job inputs).">Clear output</button>
+        </div>
+
+        <div class="footerNote" id="notesEcho"></div>
+      </section>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <!-- RATES TABLE (collapsed by default) -->
+    <details class="card" id="ratesDetails">
+      <summary>
+        <span>Rates table (edit + save)</span>
+        
+      </summary>
+
+      <div class="detailsBody">
+        <p class="hint">
+          Edit rates below, then click <b>Save rates</b>.
+          <br><span class="soft">Tip: If numbers go sideways, use <b>Reset to defaults</b> to restore the supplier-based baseline.</span>
+        </p>
+
+        <div class="splitActions" style="margin:0 0 12px">
+          <button class="btn primary" id="btnSaveRates" data-tip="Applies the edited rate card to the calculator and stores it in your browser (local storage) so it persists next time.">Save rates</button>
+          <button class="btn warn" id="btnResetDefaults" data-tip="Restores the original default rate card (supplier baseline + your refresh discount). This overwrites any edits.">Reset to defaults</button>
+        </div>
+
+        <table aria-label="Rate card editor">
+          <thead>
+            <tr>
+              <th style="width:160px">Setting</th>
+              <th>Value</th>
+              <th style="width:280px">What it affects</th>
+            </tr>
+          </thead>
+          <tbody id="ratesTableBody"></tbody>
+        </table>
+
+        <div class="footerNote">
+          Annexure 1 bedroom brackets used as baselines. :contentReference[oaicite:12]{index=12}
+          Public holiday uplift and last-minute fee references. :contentReference[oaicite:13]{index=13} :contentReference[oaicite:14]{index=14}
+          Additional bed making reference (if you later choose to add it as a priced add-on). :contentReference[oaicite:15]{index=15}
+        </div>
+      </div>
+    </details>
+  </div>
+
+<script>
+(function(){
+  // ---------------------------
+  // 
+  // ---------------------------
+
+  const DEFAULT_RATE_CARD = {
+    // Bedroom brackets: index 0=Studio, 1..6 bedrooms
+    brackets: {
+      linenSetup: [89, 89, 109, 129, 174, 199, 229],
+      strip:      [119,134, 149, 174, 234, 309, 369],
+      // Supplier refresh baseline exists, but your operational reality is "lighter touch",
+      // so we apply a default discount (see refreshDiscountFactor below).
+      refresh:    [89, 109, 119, 129, 179, 229, 289],
+      departure:  [134,149, 184, 229, 309, 429, 494],
+      endoflease: [349,399, 449, 544, 654, 759, 809],
+      deep:       [249,279, 329, 409, 499, 619, 689]
+    },
+
+    // Operational adjustments (editable)
+    refreshDiscountFactor: 0.50,   // default 50% of supplier refresh bracket (tweak as needed)
+    midstayFactor: 0.85,           // mid-stay as a % of departure bracket (supplier doc groups them, but this is adjustable)
+    gstRate: 0.10,                 // 10%
+    lastMinuteFee: 55,             // agreement mentions $55 (incl. GST) in the scheduling clause :contentReference[oaicite:19]{index=19}
+    publicHolidayUplift: 0.25,      // Annexure 4 :contentReference[oaicite:20]{index=20}
+
+    // Optional add-ons (kept intentionally light, since bracket base does the heavy lifting)
+    // These are for *edge cases* where bedrooms alone undercooks complexity.
+    addOnBathroom: 12,
+    addOnLivingRoom: 10,
+    addOnKitchen: 15,
+    addOnOutdoorArea: 10,
+    addOnExtraFloor: 18,          // floors above 1
+    addOnSqmThreshold: 160,       // if sqm exceeds threshold, apply per extra sqm
+    addOnSqmRate: 0.35,
+
+    // "Avera" control (was "overage" previously)
+    averaCapPct: 0.35             // soft cap on add-ons vs base (prevents runaway extras)
+  };
+
+  // Keys + labels for editor
+  const RATE_FIELDS = [
+    ["refreshDiscountFactor", "Refresh discount factor", "0.50 means ‘charge 50% of the refresh bracket’ by default."],
+    ["midstayFactor", "Mid-stay factor", "Mid-stay = departure bracket × this factor (editable)."],
+    ["gstRate", "GST rate", "Applied when ‘Include GST’ is ticked."],
+    ["lastMinuteFee", "Last-minute fee ($)", "Flat fee added when ‘Last-minute’ is ticked."],
+    ["publicHolidayUplift", "Public holiday uplift", "Added as a % uplift when ‘Public holiday’ is ticked."],
+    ["addOnBathroom", "Add-on per bathroom ($)", "Optional add-on: bathrooms above 0."],
+    ["addOnLivingRoom", "Add-on per living room ($)", "Optional add-on: living rooms above 0."],
+    ["addOnKitchen", "Add-on per kitchen ($)", "Optional add-on: kitchens above 0."],
+    ["addOnOutdoorArea", "Add-on per outdoor area ($)", "Optional add-on: balconies/yards etc."],
+    ["addOnExtraFloor", "Add-on per extra floor ($)", "Optional add-on: each floor above 1."],
+    ["addOnSqmThreshold", "Sqm threshold", "Add-on only applies when sqm exceeds this number."],
+    ["addOnSqmRate", "Add-on per extra sqm ($)", "Charged for sqm above the threshold."],
+    ["averaCapPct", "Avera cap (% of base)", "Soft cap: add-ons are limited to this % of base price."]
+  ];
+
+  // Service mapping
+  const CLEAN_TYPE_TO_BRACKET = {
+    departure: "departure",
+    strip: "strip",
+    refresh: "refresh",
+    midstay: "departure",
+    initiation: "deep",
+    endoflease: "endoflease",
+    linenSetup: "linenSetup"
+  };
+
+  // Storage keys
+  const LS_KEY = "pp_housekeeping_ratecard_v2";
+
+  // DOM
+  const $ = (id)=>document.getElementById(id);
+  const el = {
+    cleanType: $("cleanType"),
+    bedrooms: $("bedrooms"),
+    bathrooms: $("bathrooms"),
+    livingRooms: $("livingRooms"),
+    kitchens: $("kitchens"),
+    floors: $("floors"),
+    outdoorAreas: $("outdoorAreas"),
+    sqm: $("sqm"),
+    publicHoliday: $("publicHoliday"),
+    lastMinute: $("lastMinute"),
+    includeGST: $("includeGST"),
+    jobNotes: $("jobNotes"),
+
+    btnCalculate: $("btnCalculate"),
+    btnResetJob: $("btnResetJob"),
+
+    kpiTotal: $("kpiTotal"),
+    kpiBase: $("kpiBase"),
+    kpiGSTHint: $("kpiGSTHint"),
+    breakdownBody: $("breakdownBody"),
+    badgeMode: $("badgeMode"),
+    notesEcho: $("notesEcho"),
+
+    btnCopySummary: $("btnCopySummary"),
+    btnCopyBreakdown: $("btnCopyBreakdown"),
+    btnDownloadCSV: $("btnDownloadCSV"),
+    btnClearOutput: $("btnClearOutput"),
+
+    ratesDetails: $("ratesDetails"),
+    ratesTableBody: $("ratesTableBody"),
+    btnSaveRates: $("btnSaveRates"),
+    btnResetDefaults: $("btnResetDefaults"),
+    btnExport: $("btnExport"),
+    fileImport: $("fileImport")
+  };
+
+  // Start collapsed (per your request)
+  el.ratesDetails.open = false;
+
+  // Load rate card
+  function loadRateCard(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return structuredClone(DEFAULT_RATE_CARD);
+      const parsed = JSON.parse(raw);
+      // Merge to avoid missing keys after updates
+      return deepMerge(structuredClone(DEFAULT_RATE_CARD), parsed);
+    }catch(e){
+      return structuredClone(DEFAULT_RATE_CARD);
+    }
+  }
+
+  function saveRateCard(card){
+    localStorage.setItem(LS_KEY, JSON.stringify(card, null, 2));
+  }
+
+  function deepMerge(base, incoming){
+    if(typeof base !== "object" || base === null) return incoming;
+    if(typeof incoming !== "object" || incoming === null) return base;
+    for(const k of Object.keys(incoming)){
+      if(k in base){
+        base[k] = deepMerge(base[k], incoming[k]);
+      }else{
+        base[k] = incoming[k];
+      }
+    }
+    return base;
+  }
+
+  let rateCard = loadRateCard();
+
+  // Render rate editor
+  function renderRateEditor(){
+    el.ratesTableBody.innerHTML = "";
+
+    // Core fields
+    for(const [key, label, help] of RATE_FIELDS){
+      const tr = document.createElement("tr");
+      const tdA = document.createElement("td");
+      const tdB = document.createElement("td");
+      const tdC = document.createElement("td");
+      tdA.textContent = label;
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = (key.includes("Factor") || key.includes("Rate") || key.includes("Uplift") || key.includes("Pct")) ? "0.01" : "1";
+      input.value = rateCard[key];
+      input.dataset.rateKey = key;
+
+      tdB.appendChild(input);
+      tdC.textContent = help;
+
+      tr.appendChild(tdA); tr.appendChild(tdB); tr.appendChild(tdC);
+      el.ratesTableBody.appendChild(tr);
+    }
+
+    // Brackets (compact)
+    const addBracketSection = (serviceKey, label) => {
+      const sep = document.createElement("tr");
+      const tds = document.createElement("td");
+      tds.colSpan = 3;
+      tds.style.padding = "10px 8px";
+      tds.innerHTML = `<b style="color:#fff">${label} (Bedroom brackets)</b> <span class="soft">Studio → 6 beds</span>`;
+      sep.appendChild(tds);
+      el.ratesTableBody.appendChild(sep);
+
+      const tr = document.createElement("tr");
+      const tdA = document.createElement("td");
+      const tdB = document.createElement("td");
+      const tdC = document.createElement("td");
+      tdA.textContent = "Values ($)";
+      tdC.textContent = "Base price picked by bedroom count (0=Studio).";
+
+      const container = document.createElement("div");
+      container.style.display="grid";
+      container.style.gridTemplateColumns="repeat(7, 1fr)";
+      container.style.gap="6px";
+
+      const labels = ["0","1","2","3","4","5","6"];
+      labels.forEach((n, idx)=>{
+        const wrap = document.createElement("div");
+        wrap.style.display="flex";
+        wrap.style.flexDirection="column";
+        wrap.style.gap="4px";
+
+        const small = document.createElement("div");
+        small.style.fontSize="11px";
+        small.style.color="var(--muted)";
+        small.textContent = n;
+
+        const inp = document.createElement("input");
+        inp.type="number";
+        inp.step="1";
+        inp.value = rateCard.brackets[serviceKey][idx];
+        inp.dataset.bracketService = serviceKey;
+        inp.dataset.bracketIndex = idx;
+
+        wrap.appendChild(small);
+        wrap.appendChild(inp);
+        container.appendChild(wrap);
+      });
+
+      tdB.appendChild(container);
+      tr.appendChild(tdA); tr.appendChild(tdB); tr.appendChild(tdC);
+      el.ratesTableBody.appendChild(tr);
+    };
+
+    addBracketSection("departure",  "Departure (turnover)");
+    addBracketSection("strip",      "Strip & Clean");
+    addBracketSection("refresh",    "Refresh clean");
+    addBracketSection("deep",       "Initiation / deep clean");
+    addBracketSection("endoflease", "End of lease");
+    addBracketSection("linenSetup", "Linen & amenities set-up");
+  }
+
+  function readEditorToRateCard(){
+    // scalar fields
+    el.ratesTableBody.querySelectorAll("input[data-rate-key]").forEach(inp=>{
+      const key = inp.dataset.rateKey;
+      const val = Number(inp.value);
+      rateCard[key] = Number.isFinite(val) ? val : rateCard[key];
+    });
+
+    // brackets
+    el.ratesTableBody.querySelectorAll("input[data-bracket-service]").forEach(inp=>{
+      const s = inp.dataset.bracketService;
+      const i = Number(inp.dataset.bracketIndex);
+      const val = Number(inp.value);
+      if(!rateCard.brackets[s]) return;
+      if(Number.isFinite(i) && i>=0 && i<rateCard.brackets[s].length){
+        rateCard.brackets[s][i] = Number.isFinite(val) ? val : rateCard.brackets[s][i];
+      }
+    });
+  }
+
+  // Pricing helpers
+  const money = (n)=> {
+    const x = (Math.round((n + Number.EPSILON) * 100) / 100);
+    return x.toLocaleString("en-AU", {style:"currency", currency:"AUD"});
+  };
+
+  function clampBedrooms(b){
+    if(!Number.isFinite(b)) return 0;
+    if(b < 0) return 0;
+    if(b > 6) return 6;
+    return Math.floor(b);
+  }
+
+  function baseFromBrackets(type, bedrooms){
+    const bracketKey = CLEAN_TYPE_TO_BRACKET[type];
+    const b = clampBedrooms(bedrooms);
+    let base = rateCard.brackets[bracketKey][b];
+
+    // Adjust refresh by your operational preference
+    if(type === "refresh"){
+      base = base * rateCard.refreshDiscountFactor;
+    }
+
+    // Mid-stay factor relative to departure
+    if(type === "midstay"){
+      base = base * rateCard.midayFactorSafe;
+    }
+
+    return base;
+  }
+
+  function computeEstimate(){
+    const type = el.cleanType.value;
+    const bedrooms = Number(el.bedrooms.value);
+    const bathrooms = Number(el.bathrooms.value);
+    const livingRooms = Number(el.livingRooms.value);
+    const kitchens = Number(el.kitchens.value);
+    const floors = Number(el.floors.value);
+    const outdoorAreas = Number(el.outdoorAreas.value);
+    const sqm = Number(el.sqm.value);
+    const isPH = !!el.publicHoliday.checked;
+    const isLM = !!el.lastMinute.checked;
+    const includeGST = !!el.includeGST.checked;
+    const notes = (el.jobNotes.value || "").trim();
+
+    // Fix a small typo-proofing: midstayFactor stored as "midstayFactor"
+    rateCard.midayFactorSafe = Number.isFinite(rateCard.midayFactorSafe) ? rateCard.midayFactorSafe : rateCard.midstayFactor;
+
+    // 1) base
+    let baseKey = CLEAN_TYPE_TO_BRACKET[type];
+    let baseBedroomIndex = clampBedrooms(bedrooms);
+
+    let base = rateCard.brackets[baseKey][baseBedroomIndex];
+
+    const items = [];
+    let baseLabel = "";
+
+    if(type === "refresh"){
+      baseLabel = `Base (Refresh bracket × discount)`;
+      items.push({label: `Supplier refresh bracket (beds: ${baseBedroomIndex})`, amount: rateCard.brackets[baseKey][baseBedroomIndex]});
+      items.push({label: `Refresh discount factor (${rateCard.refreshDiscountFactor})`, amount: - (rateCard.brackets[baseKey][baseBedroomIndex] * (1 - rateCard.refreshDiscountFactor))});
+      base = base * rateCard.refreshDiscountFactor;
+    } else if(type === "midstay"){
+      // supplier describes standard departure & midstay together, but Annexure table is departure; we make midstay a configurable factor.
+      baseLabel = `Base (Departure bracket × mid-stay factor)`;
+      const dep = rateCard.brackets["departure"][baseBedroomIndex];
+      items.push({label: `Supplier departure bracket (beds: ${baseBedroomIndex})`, amount: dep});
+      items.push({label: `Mid-stay factor (${rateCard.midstayFactor})`, amount: dep * (rateCard.midstayFactor - 1)});
+      base = dep * rateCard.midstayFactor;
+    } else if(type === "initiation"){
+      baseLabel = `Base (Deep cleaning bracket)`;
+      items.push({label: `Supplier deep cleaning bracket (beds: ${baseBedroomIndex})`, amount: base});
+    } else {
+      baseLabel = `Base (${type} bracket)`;
+      items.push({label: `Supplier base bracket (beds: ${baseBedroomIndex})`, amount: base});
+    }
+
+    // 2) add-ons (kept light) + avera cap
+    let addOns = 0;
+    const pushAddOn = (label, amt)=>{
+      if(!amt || Math.abs(amt) < 0.005) return;
+      addOns += amt;
+      items.push({label, amount: amt});
+    };
+
+    pushAddOn(`Add-on: bathrooms (${bathrooms} × ${rateCard.addOnBathroom})`, bathrooms * rateCard.addOnBathroom);
+    pushAddOn(`Add-on: living rooms (${livingRooms} × ${rateCard.addOnLivingRoom})`, livingRooms * rateCard.addOnLivingRoom);
+    pushAddOn(`Add-on: kitchens (${kitchens} × ${rateCard.addOnKitchen})`, kitchens * rateCard.addOnKitchen);
+    pushAddOn(`Add-on: outdoor areas (${outdoorAreas} × ${rateCard.addOnOutdoorArea})`, outdoorAreas * rateCard.addOnOutdoorArea);
+
+    const extraFloors = Math.max(0, (Number.isFinite(floors)?floors:1) - 1);
+    pushAddOn(`Add-on: extra floors (${extraFloors} × ${rateCard.addOnExtraFloor})`, extraFloors * rateCard.addOnExtraFloor);
+
+    const threshold = Number(rateCard.addOnSqmThreshold);
+    const extraSqm = Math.max(0, (Number.isFinite(sqm)?sqm:0) - threshold);
+    pushAddOn(`Add-on: extra sqm (${extraSqm} × ${rateCard.addOnSqmRate})`, extraSqm * rateCard.addOnSqmRate);
+
+    // Avera cap: add-ons limited to % of base
+    const cap = base * rateCard.averaCapPct;
+    if(addOns > cap){
+      const reduction = addOns - cap;
+      items.push({label: `Avera cap applied (limits add-ons to ${Math.round(rateCard.averaCapPct*100)}% of base)`, amount: -reduction});
+      addOns = cap;
+    }
+
+    // 3) fees/uplifts
+    let subtotal = base + addOns;
+
+    if(isLM){
+      items.push({label:`Last-minute booking fee`, amount: rateCard.lastMinuteFee});
+      subtotal += rateCard.lastMinuteFee;
+    }
+
+    if(isPH){
+      const uplift = subtotal * rateCard.publicHolidayUplift;
+      items.push({label:`Public holiday uplift (${Math.round(rateCard.publicHolidayUplift*100)}%)`, amount: uplift});
+      subtotal += uplift;
+    }
+
+    // 4) GST
+    let gst = 0;
+    let total = subtotal;
+    if(includeGST){
+      gst = subtotal * rateCard.gstRate;
+      items.push({label:`GST (${Math.round(rateCard.gstRate*100)}%)`, amount: gst});
+      total = subtotal + gst;
+    }
+
+    // 5) notes echo (not priced)
+    return { type, baseLabel, base, subtotal, gst, total, items, notes };
+  }
+
+  function renderOutput(res){
+    el.kpiTotal.textContent = money(res.total);
+    el.kpiGSTHint.textContent = el.includeGST.checked ? "(incl. GST)" : "(excl. GST)";
+    el.kpiBase.textContent = money(res.base);
+
+    el.breakdownBody.innerHTML = "";
+    res.items.forEach(li=>{
+      const row = document.createElement("div");
+      row.className = "lineItem";
+      const left = document.createElement("div");
+      left.className="left";
+      left.textContent = li.label;
+
+      const right = document.createElement("div");
+      right.style.fontWeight = "800";
+      right.textContent = money(li.amount);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      el.breakdownBody.appendChild(row);
+    });
+
+    const cleanTypeName = el.cleanType.options[el.cleanType.selectedIndex].textContent;
+    el.badgeMode.textContent = `Bedroom bracket base • ${cleanTypeName}`;
+
+    if(res.notes){
+      el.notesEcho.textContent = `Notes: ${res.notes}`;
+    } else {
+      el.notesEcho.textContent = "";
+    }
+  }
+
+  // Clipboard helpers
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+    }catch(e){
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+  }
+
+  function buildSummary(res){
+    const cleanTypeName = el.cleanType.options[el.cleanType.selectedIndex].textContent;
+    const beds = clampBedrooms(Number(el.bedrooms.value));
+    const incG = el.includeGST.checked ? "incl. GST" : "excl. GST";
+    return `${cleanTypeName} • ${beds} bed • Total: ${money(res.total)} (${incG})`;
+  }
+
+  function buildBreakdownText(res){
+    const lines = [];
+    lines.push(buildSummary(res));
+    lines.push("");
+    res.items.forEach(li=>{
+      const sign = li.amount >= 0 ? "+" : "−";
+      lines.push(`${sign} ${li.label}: ${money(Math.abs(li.amount))}`);
+    });
+    if(res.notes) lines.push("", `Notes: ${res.notes}`);
+    return lines.join("\n");
+  }
+
+  function downloadCSV(res){
+    const rows = [["Item","Amount"]];
+    res.items.forEach(li=> rows.push([li.label, (Math.round(li.amount*100)/100).toString()]));
+    const csv = rows.map(r => r.map(x => `"${String(x).replaceAll('"','""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "housekeeping_estimate_breakdown.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }
+
+  // Events
+  el.btnCalculate.addEventListener("click", ()=>{
+    const res = computeEstimate();
+    renderOutput(res);
+  });
+
+  el.btnResetJob.addEventListener("click", ()=>{
+    el.cleanType.value = "departure";
+    el.bedrooms.value = 2;
+    el.bathrooms.value = 1;
+    el.livingRooms.value = 1;
+    el.kitchens.value = 1;
+    el.floors.value = 1;
+    el.outdoorAreas.value = 1;
+    el.sqm.value = 90;
+    el.publicHoliday.checked = false;
+    el.lastMinute.checked = false;
+    el.includeGST.checked = true;
+    el.jobNotes.value = "";
+    const res = computeEstimate();
+    renderOutput(res);
+  });
+
+  el.btnClearOutput.addEventListener("click", ()=>{
+    el.kpiTotal.textContent = "$0";
+    el.kpiBase.textContent = "$0";
+    el.kpiGSTHint.textContent = "";
+    el.breakdownBody.innerHTML = "";
+    el.notesEcho.textContent = "";
+  });
+
+  el.btnCopySummary.addEventListener("click", async ()=>{
+    const res = computeEstimate();
+    await copyText(buildSummary(res));
+  });
+
+  el.btnCopyBreakdown.addEventListener("click", async ()=>{
+    const res = computeEstimate();
+    await copyText(buildBreakdownText(res));
+  });
+
+  el.btnDownloadCSV.addEventListener("click", ()=>{
+    const res = computeEstimate();
+    downloadCSV(res);
+  });
+
+  // Rate card actions
+  el.btnSaveRates.addEventListener("click", ()=>{
+    readEditorToRateCard();
+    saveRateCard(rateCard);
+    // Recalc immediately so edits feel “real”
+    const res = computeEstimate();
+    renderOutput(res);
+  });
+
+  el.btnResetDefaults.addEventListener("click", ()=>{
+    rateCard = structuredClone(DEFAULT_RATE_CARD);
+    saveRateCard(rateCard);
+    renderRateEditor();
+    const res = computeEstimate();
+    renderOutput(res);
+  });
+
+  el.btnExport.addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(rateCard, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "pp_housekeeping_ratecard.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  });
+
+  el.fileImport.addEventListener("change", async (ev)=>{
+    const file = ev.target.files && ev.target.files[0];
+    if(!file) return;
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      rateCard = deepMerge(structuredClone(DEFAULT_RATE_CARD), parsed);
+      saveRateCard(rateCard);
+      renderRateEditor();
+      const res = computeEstimate();
+      renderOutput(res);
+    }catch(e){
+      alert("That file doesn’t look like a valid exported rate card JSON.");
+    }finally{
+      el.fileImport.value = "";
+    }
+  });
+
+  // Initial render
+  renderRateEditor();
+  const initial = computeEstimate();
+  renderOutput(initial);
+
+})();
+</script>
+</body>
+</html>
